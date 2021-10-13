@@ -62,7 +62,7 @@ class DataParser:
                 process_row(row, nline)
                 nline += 1
 
-    def to_file(self, output_path: str):
+    def _program_as_string(self):
         def fact_lines():
             len_features = len(self._features)
             len_rows = len_features + 1
@@ -70,11 +70,12 @@ class DataParser:
             for i in range(len_features, len(self._facts), len_rows):
                 yield self._facts[i:i + len_rows]
 
+        if self._features is None:
+            return " ".join([str(f) + "." for f in self._facts])
+        else:
+            return "\n".join(
+                [" ".join([str(f) + "." for f in c]) for c in fact_lines()])
+
+    def to_file(self, output_path: str):
         with open(output_path, "w") as output_file:
-            if self._features is None:
-                output_file.write(" ".join([str(f) + "."
-                                            for f in self._facts]))
-            else:
-                output_file.write("\n".join([
-                    " ".join([str(f) + "." for f in c]) for c in fact_lines()
-                ]))
+            output_file.write(self._program_as_string())
