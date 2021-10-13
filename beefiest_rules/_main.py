@@ -3,6 +3,8 @@ from beefiest_rules.explainer import Explainer
 from beefiest_rules.parser import DataParser
 from clingo import Control
 
+__version__ = "0.0.1"
+
 
 class BeefExplainer:
     def __init__(self) -> None:
