@@ -1,1 +1,1 @@
-from ._explainer import Explainer, Box
+from ._explainer import Explainer, Box, Explanation
