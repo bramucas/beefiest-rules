@@ -1,4 +1,3 @@
-import csv
 from typing import Iterable
 from beefiest_rules.explainer import Explainer
 from clingo import Control
@@ -11,15 +10,15 @@ class BeefExplainer:
     def __init__(self) -> None:
         self._explainer = None
 
-    def fit_from_csv(self,
-                     csv_path,
-                     have_names=True,
-                     factor=0,
-                     numerical_columns=None,
-                     omit_names=False,
-                     delimiter=",") -> None:
+    def fit(self,
+            data,
+            have_names=True,
+            factor=0,
+            numerical_columns=None,
+            omit_names=False,
+            delimiter=",") -> None:
         # from csv
-        dafacter = Dafacter(csv_path,
+        dafacter = Dafacter(data,
                             factor=factor,
                             numerical_columns=numerical_columns,
                             have_names=have_names,
