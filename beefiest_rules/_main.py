@@ -1,7 +1,8 @@
+import csv
 from typing import Iterable
 from beefiest_rules.explainer import Explainer
-from beefiest_rules.parser import DataParser
 from clingo import Control
+from dafact import Dafacter
 
 __version__ = "0.0.1"
 
@@ -10,14 +11,24 @@ class BeefExplainer:
     def __init__(self) -> None:
         self._explainer = None
 
-    def fit_from_csv(self, csv_path) -> None:
+    def fit_from_csv(self,
+                     csv_path,
+                     have_names=True,
+                     factor=0,
+                     numerical_columns=None,
+                     omit_names=False,
+                     delimiter=",") -> None:
         # from csv
-        dp = DataParser()
-        dp.from_csv(csv_path)
+        dafacter = Dafacter(csv_path,
+                            factor=factor,
+                            numerical_columns=numerical_columns,
+                            have_names=have_names,
+                            omit_names=omit_names,
+                            delimiter=delimiter)
 
         # compute model (mocked for now)
         ctl = Control()
-        # ctl.add("base", [], dp._program_as_string())
+        # ctl.add("base", [], dafacter.program_as_string())
         # with open("boxes.lp", "r") as boxes_file:
         #     ctl.add("base", [], boxes_file.read())
         ctl.add(
