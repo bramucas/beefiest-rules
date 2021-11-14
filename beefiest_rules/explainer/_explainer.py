@@ -7,7 +7,7 @@ from ..utils import check_iterable
 
 class Box:
     def __init__(self, axis_names: Iterable[str],
-                 boundaries: Iterable[Tuple[float]]) -> None:
+                 boundaries: Iterable[Tuple[float]], major_class: str) -> None:
         """
         Args:
             feature_names (Iterable[str]): names of the axes on which the box is defined.
@@ -26,6 +26,7 @@ class Box:
 
         self._features: Iterable[str] = axis_names
         self._boundaries: Iterable[Tuple[np._FloatType]] = boundaries
+        self.major_class: str = major_class
 
     def contains_point(self,
                        coord_tuple: Tuple[float],
@@ -77,17 +78,9 @@ class Explanation:
 
 
 class Explainer:
-    def __init__(self, box_clusters: Iterable[Box],
-                 majority_classes: Iterable):
+    def __init__(self, box_clusters: Iterable[Box]):
         check_iterable(box_clusters, "box_clusers")
-        check_iterable(majority_classes, "majority_classes")
-        if len(box_clusters) != len(majority_classes):
-            raise ValueError(
-                'Arguments "box_clusters" and "majority_classes" must have same lenght'
-            )
-
         self._boxes = box_clusters
-        self._majority_classes = majority_classes
 
     @staticmethod
     def from_clingo_model(m: Model):
@@ -102,14 +95,16 @@ class Explainer:
                     limits[i_box][f] = []
                 limits[i_box][f].append(l)
         return Explainer([
-            Box(features, list(map(tuple, map(sorted, boundaries))))
-            for features, boundaries in [zip(*d.items()) for d in limits]
-        ], classes)
+            Box(features, list(map(tuple, map(sorted, boundaries))), c)
+            for (features,
+                 boundaries), c in zip([zip(*d.items())
+                                        for d in limits], classes)
+        ])
 
     def explain(self,
                 instances: Iterable,
                 features: Iterable[str] = None) -> Iterable:
         for i in instances:
-            yield [(major_class, box.get_explanation()) for box, major_class in
-                   zip(self._boxes, self._majority_classes)
+            yield [(box.major_class, box.get_explanation())
+                   for box in self._boxes
                    if box.contains_point(i, axis_names=features)]
