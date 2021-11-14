@@ -8,9 +8,9 @@ class TestExplainer:
     @pytest.fixture(scope='class')
     def custom_explainer(self):
         return Explainer([
-            Box(["f1", "f2"], [(0, 5), (20, 40)]),
-            Box(["f1", "f2"], [(6, 11), (20, 40)])
-        ], ["mockclass1", "mockclass2"])
+            Box(["f1", "f2"], [(0, 5), (20, 40)], "mockclass1"),
+            Box(["f1", "f2"], [(6, 11), (20, 40)], "mockclass2")
+        ])
 
     @pytest.fixture(scope='class')
     def custom_program(self):
