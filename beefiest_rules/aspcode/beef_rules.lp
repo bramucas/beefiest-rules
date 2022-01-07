@@ -1,4 +1,4 @@
-#const maxboxes = 3.
+#const maxboxes = 5.
 number(1..maxboxes).
 
 %% Pick a number of boxes
@@ -30,11 +30,14 @@ boxinliercount(B, IC) :- IC=#count{ I : box_inlier(B, I)}, box(B).
 boxpositives(B, P) :- box(B), P=#count{ I : box_inlier(B, I), value(I, T, 1) }, P > 0.
 boxnegatives(B, N) :- box(B), N=#count{ I : box_inlier(B, I), value(I, T, 0) }, N > 0.
 
-boxmain(B, 1) :- boxpositives(B, P), boxnegatives(B, N), P > N.
-boxmain(B, 0) :- boxpositives(B, P), boxnegatives(B, N), P < N.
+boximpurity(B, N) :- box(B), boxpositives(B, P), boxnegatives(B,N), P > N.
+boximpurity(B, P) :- box(B), boxpositives(B, P), boxnegatives(B,N), N > P.
 
-boximpurity(B, N) :- boxmain(B, 1), boxnegatives(B, N).
-boximpurity(B, P) :- boxmain(B, 0), boxnegatives(B, P).
+boxmain(B, 0) :- box(B), boxnegatives(B, N), not boxpositives(B, _).
+boxmain(B, 1) :- box(B), not boxnegatives(B, _), boxpositives(B, P).
+boxmain(B, 0) :- box(B), boxnegatives(B, N), boxpositives(B, P), N > P.
+boxmain(B, 1) :- box(B), boxnegatives(B, N), boxpositives(B, P), N < P.
+boxmain(B, 2) :- box(B), boxnegatives(B, N), boxpositives(B, P), N = P.
 
 % Feature is shared but limits don't overlap (L1 R1) [L2 R2] = 0
 overlap(B1, B2, F, 0) :- box(B1), box(B2), boxfeature(B1, F), boxfeature(B2, F), B1 < B2, boxlimit(B1, F, L1, LV1), boxlimit(B1, F, R1, RV1), L1 != R1,
