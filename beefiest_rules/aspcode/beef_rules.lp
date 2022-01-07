@@ -48,16 +48,14 @@ overlap(B1, B2, F, OV) :- box(B1), box(B2), boxfeature(B1, F), boxfeature(B2, F)
 overlap(B1, B2, F, OV) :- box(B1), box(B2), boxfeature(B1, F), not boxfeature(B2, F), B1 != B2, boxlimit(B1, F, L1, LV1), boxlimit(B1, F, R1, RV1), L1 != R1,
                             left(L1, R1, F), OV = RV1 - LV1.
 
-:- box(B), boximpurity(B, IM).
-:- box(B1), box(B2), B1 != B2, overlap(B1, B2, F, OV), OV > 0.
-:- outlier(I).
+:- box(B), not boxmain(B, _).
 
 #show box/1.
 #show boxfeature/2.
 
 #show boxlimit/3.
 
+#show boxmain/2.
 #show boximpurity/2.
 
 #show outlier/1.
-
