@@ -6,18 +6,18 @@ number(1..maxboxes).
 box(1..B) :- boxes(B).
 
 %% Blindly select the features used for each box
-2 { boxfeature(B,F) : feature(F), target(T), F != T } :- box(B).
+1 { boxfeature(B,F) : feature(F), target(T), F != T } :- box(B).
 
 %% Map points in relation to each other so we know for each point and feature if they are to the left
 %% to the right or in the same position as another given instance. This helps us avoid further arithmetic calculations
-left(I1, I2, F) :- instance(I1), instance(I2), feature(F), target(T), value(I1, F, V1), value(I2, F, V2), V1 <= V2, F != T.
-right(I1, I2, F) :- instance(I1), instance(I2), feature(F), target(T), value(I1, F, V1), value(I2, F, V2), V1 >= V2, F != T.
+left(V1, V2, F) :- feature(F), target(T), value(_, F, V1), value(_, F, V2), V1 <= V2, F != T.
+right(V1, V2, F) :- feature(F), target(T), value(_, F, V1), value(_, F, V2), V1 >= V2, F != T.
 
 2 { boxlimit(B, F, I, V) : value(I,F,V) } 2 :- boxfeature(B,F).
 boxlimit(B, F, V) :- boxlimit(B, F, _, V).
 
 boxfeature_inlier(B, F, I) :- boxlimit(B, F, L1, _), boxlimit(B, F, L2, _), left(L1, L2, F), L1 != L2,
-                                    instance(I), right(I, L1, F), left(I, L2, F).
+                                    instance(I), value(I, F, V), right(V, L1, F), left(V, L2, F).
 boxfeature_outlier(B, F, I) :- instance(I), boxfeature(B,F), not boxfeature_inlier(B, F, I).
 
 box_outlier(B, I) :- boxfeature_outlier(B, _, I).
