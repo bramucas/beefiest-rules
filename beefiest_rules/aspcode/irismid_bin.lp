@@ -1,4 +1,5 @@
-feature('sepal_length'). feature('sepal_width'). feature('petal_length'). feature('petal_width'). feature('species'). 
+feature('sepal_length'). feature('sepal_width'). feature('petal_length'). feature('petal_width'). feature('species').
+target('species').
 instance(1). value(1, 'sepal_length', 70). value(1, 'sepal_width', 32). value(1, 'petal_length', 47). value(1, 'petal_width', 14). value(1, 'species', 0). 
 instance(2). value(2, 'sepal_length', 64). value(2, 'sepal_width', 32). value(2, 'petal_length', 45). value(2, 'petal_width', 15). value(2, 'species', 0). 
 instance(3). value(3, 'sepal_length', 69). value(3, 'sepal_width', 31). value(3, 'petal_length', 49). value(3, 'petal_width', 15). value(3, 'species', 0). 
