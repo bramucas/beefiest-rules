@@ -61,5 +61,3 @@ box_overlap(B1, B2) :- box(B1), box(B2), not no_overlap(B1, B2), B1 < B2.
 
 #show box_overlap/2.
 #show overlap/4.
-
-#show bfc/1.
