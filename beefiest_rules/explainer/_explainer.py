@@ -63,14 +63,15 @@ class Box:
         return True
 
     def get_explanation(self):
-        return Explanation()
+        causes = "\n".join([
+            f'|__{f} between ({l}, {r})'
+            for f, (l, r) in zip(self._features, self._boundaries)
+        ])
+        return Explanation(f'Class {self.major_class}\n{causes}')
 
 
 class Explanation:
-    def __init__(
-        self,
-        string="This is mocked\n  |__Explanation class is just a mocked class."
-    ):
+    def __init__(self, string=""):
         self.string = string
 
     def __str__(self) -> str:

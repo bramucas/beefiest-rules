@@ -30,15 +30,13 @@ class TestExplainer:
         assert type(expl) == Explanation
         assert major_class == 0
         assert str(
-            expl
-        ) == "This is mocked\n  |__Explanation class is just a mocked class."
+            expl) == "Class 0\n|__f1 between (0, 5)\n|__f2 between (20, 40)"
 
         # instance 2
         major_class, expl = explanations[1][0]
         assert major_class == 1
         assert str(
-            expl
-        ) == "This is mocked\n  |__Explanation class is just a mocked class."
+            expl) == "Class 1\n|__f1 between (6, 11)\n|__f2 between (20, 40)"
 
     def test_explain(self, custom_explainer):
         self.assert_expected_custom_explainer(custom_explainer)
