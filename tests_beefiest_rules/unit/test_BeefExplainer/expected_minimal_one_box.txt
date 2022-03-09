@@ -1,0 +1,1 @@
+[{'_features': ['feat_a'], '_boundaries': [(1, 1)], 'major_class': 1}, {'_features': ['feat_b'], '_boundaries': [(2, 2)], 'major_class': 1}]

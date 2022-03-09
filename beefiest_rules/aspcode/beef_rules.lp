@@ -1,25 +1,17 @@
-#const maxboxes = 2.
-number(1..maxboxes).
-
-%% Pick a number of boxes
-1{ boxes(B) : number(B) }1.
-box(1..B) :- boxes(B).
-
-%% Blindly select the features used for each box
-1 { boxfeature(B,F) : feature(F), target(T), F != T } :- box(B).
+#const boxes = 3.
+box(1..boxes).
 
 feature_value(F,V) :- value(_, F, V), feature(F), target(T), F != T.
 
-%% Map points in relation to each other so we know for each point and feature if they are to the left
-%% to the right or in the same position as another given instance. This helps us avoid further arithmetic calculations
+%% Map points in relation to each other so we know for each point. This helps us avoid further arithmetic calculations
 left(F, V1, V2) :- feature(F), feature_value(F, V1), feature_value(F, V2), V1 <= V2.
-right(F, V1, V2) :- feature(F), feature_value(F, V1), feature_value(F, V2), V1 >= V2.
 
-1 { boxlimits(B, F, V1, V2) : left(F, V1, V2) } 1 :- boxfeature(B,F).
+{ boxlimits(B, F, V1, V2) : left(F, V1, V2) } 1 :- box(B), feature(F), target(T), F != T.
+boxfeature(B, F) :- boxlimits(B, F, _, _).
 
 boxfeature_width(B, F, W) :- boxlimits(B, F, V1, V2), W = V2 - V1.
 
-boxfeature_inlier(B, F, I, V) :- boxlimits(B, F, L1, L2), value(I, F, V), left(F, V, L2), right(F, V, L1).
+boxfeature_inlier(B, F, I, V) :- boxlimits(B, F, L1, L2), value(I, F, V), left(F, V, L2), left(F, L1, V).
 boxfeature_inlier(B, F, I) :- boxfeature_inlier(B, F, I, _).
 boxfeature_outlier(B, F, I) :- instance(I), boxfeature(B,F), not boxfeature_inlier(B, F, I).
 

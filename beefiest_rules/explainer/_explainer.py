@@ -63,14 +63,15 @@ class Box:
         return True
 
     def get_explanation(self):
-        return Explanation()
+        causes = "\n".join([
+            f'|__{f} between ({l}, {r})'
+            for f, (l, r) in zip(self._features, self._boundaries)
+        ])
+        return Explanation(f'Class {self.major_class}\n{causes}')
 
 
 class Explanation:
-    def __init__(
-        self,
-        string="This is mocked\n  |__Explanation class is just a mocked class."
-    ):
+    def __init__(self, string=""):
         self.string = string
 
     def __str__(self) -> str:
@@ -79,27 +80,35 @@ class Explanation:
 
 class Explainer:
     def __init__(self, box_clusters: Iterable[Box]):
-        check_iterable(box_clusters, "box_clusers")
+        check_iterable(box_clusters, "box_clusters")
         self._boxes = box_clusters
 
     @staticmethod
     def from_clingo_model(m: Model):
-        n_box = len([s for s in m.symbols(shown=True) if s.name == "box"])
-        limits, classes = [dict() for _ in range(0, n_box)
-                           ], [f'mockclass{i+1}' for i in range(0, n_box)]
+        limits, classes = dict(), dict()
         for sym in m.symbols(shown=True):
-            if sym.name == "boxlimit":
-                i_box, f, l = sym.arguments
-                i_box, f, l = int(str(i_box)) - 1, str(f), int(str(l))
-                if f not in limits[i_box]:
-                    limits[i_box][f] = []
-                limits[i_box][f].append(l)
-        return Explainer([
-            Box(features, list(map(tuple, map(sorted, boundaries))), c)
-            for (features,
-                 boundaries), c in zip([zip(*d.items())
-                                        for d in limits], classes)
-        ])
+            if sym.name == "boxlimits":
+                i_box, f, left, right = sym.arguments
+                i_box, f, left, right = int(str(i_box)), str(f).strip('"').strip(), \
+                    int(str(left)), int(str(right))
+                if not i_box in limits:
+                    limits[i_box] = dict()
+                limits[i_box][f] = (left, right)
+
+            if sym.name == "boxmain":
+                i_box, main_class = sym.arguments
+                i_box, main_class = int(str(i_box)), int(str(main_class))
+                classes[i_box] = main_class
+
+        box_list = list()
+        for i_box, ls in limits.items():
+            box_list.append(
+                Box(
+                    list(ls.keys()),
+                    list(ls.values()),
+                    classes[i_box],
+                ))
+        return Explainer(box_list)
 
     def explain(self,
                 instances: Iterable,
