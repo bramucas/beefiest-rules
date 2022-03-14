@@ -77,7 +77,23 @@ class BeefExplainer:
             factor=0,
             numerical_columns=None,
             omit_names=False,
-            delimiter=",") -> None:
+            delimiter=",",
+            on_explainer=None) -> None:
+        """Fit the explainer.
+
+        Args:
+            data (Union[str, ndarray, pd.Dataframe]) : (array-like, sparse matrix) of shape (n_samples, n_features) or (str) path to a csv file.
+            target (Union[str, int]): name/index of the target feature/column.
+            have_names (bool, optional): whether if the names of the features are meant to be extracted from data. If false, features will be automatically labeled as (f1, f2, etc.).Defaults to True.
+            factor (int, optional): number of decimals which are meant to be included. If 0, it will be automatically set at maximum precision. Defaults to 0.
+            numerical_columns (_type_, optional): which columns are meant to be treated as numerical. If None, this will be set automatically (mistakes may be done). Defaults to None.
+            omit_names (bool, optional): WILL BE DEPRECATED. In case data is a csv, whether to ignore the header row or not. Defaults to False.
+            delimiter (str, optional): delimiter of the csv file. Defaults to ",".
+            on_explainer (Callback[[Explainer]] , optional): callback for intercepting Explainers. Defaults to None.
+
+        Raises:
+            ValueError: if target identifier is nor str or int.
+        """
         # target
         if type(target) == str:
             target_fact = f'target("{target}").'
@@ -102,15 +118,32 @@ class BeefExplainer:
         ctl.add("base", [], target_fact)
 
         ctl.ground([("base", [])])
-        m = list(ctl.solve(yield_=True))  # TODO: get only the optimal found
-        if m == []:
-            warn('UNSAT - explainer object not ready to explain')
+
+        if on_explainer is not None:
+            ctl.solve(on_model=lambda m: on_explainer(
+                Explainer.from_clingo_model(m)))
         else:
-            self._explainer = Explainer.from_clingo_model(m[-1])
+            m = list(ctl.solve(yield_=True))
+            if m == []:
+                warn('UNSAT - explainer object not ready to explain')
+            else:
+                self._explainer = Explainer.from_clingo_model(m[-1])
 
     def explain(self,
                 instances: Iterable,
                 features: Iterable[str] = None) -> None:
+        """Give explanations for a set of instances.
+
+        Args:
+            instances (Iterable): instances to be explained. Coordinates/features must match those used to fit the explainer.
+            features (Iterable[str], optional): Features to be used for explaining.  Defaults to None.
+
+        Raises:
+            RuntimeError: if explainer is not already fitted.
+
+        Returns:
+            Iterable: explanations for the instances
+        """
         if self._explainer is None:
             raise RuntimeError("explain() called successful call to fit().")
         return self._explainer.explain(instances, features)
