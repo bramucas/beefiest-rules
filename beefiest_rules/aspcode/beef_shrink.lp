@@ -1,0 +1,1 @@
+#minimize { W@1,B,F : boxfeature_width(B, F, W) }.
