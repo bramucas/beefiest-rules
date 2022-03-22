@@ -20,9 +20,9 @@ box_inlier(B, I) :- box(B), instance(I), not box_outlier(B,I).
 
 outlier(I) :- instance(I), not box_inlier(_, I).
 
-% Impurity requires at least knowing the majoritary class, thus counting.
-% Further research pending to see if we can do this in the minimize predicate.
-impurity(B, IM) :- box(B), CN=#count{ I : box_inlier(B,I), target(T), value(I, T, 0)}, CP=#count{ I : box_inlier(B,I), target(T), value(I, T, 1) }, IM=#min{ CP; CN }.
+% Since we don't need the Impurity metric, we just tag pairs of inliers that differ in value for the target
+% Then we just minimize the cardinality of those predicates to homogenize the contents of each box.
+impurepair(B, I1, I2) :- box_inlier(B, I1), box_inlier(B, I2), I1 > I2, target(T), value(I1, T, V1), value(I2, T, V2), V1 != V2.
 
 % Feature is shared but limits don't overlap (L1 R1) [L2 R2] = 0
 overlap(B1, B2, F, 0) :- box(B1), box(B2), boxfeature(B1, F), boxfeature(B2, F), B1 < B2, boxlimits(B1, F, L1, R1),
@@ -44,9 +44,4 @@ box_overlap(B1, B2) :- box(B1), box(B2), not no_overlap(B1, B2), B1 < B2.
 
 #show box/1.
 #show boxfeature/2.
-
 #show boxlimits/4.
-
-#show impurity/2.
-
-#show box_overlap/2.
