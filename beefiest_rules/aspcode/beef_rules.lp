@@ -20,19 +20,9 @@ box_inlier(B, I) :- box(B), instance(I), not box_outlier(B,I).
 
 outlier(I) :- instance(I), not box_inlier(_, I).
 
-%% Count targets in each box
-boxinliercount(B, IC) :- IC=#count{ I : box_inlier(B, I)}, box(B).
-boxpositives(B, P) :- box(B), P=#count{ I : box_inlier(B, I), value(I, T, 1), target(T) }, P > 0.
-boxnegatives(B, N) :- box(B), N=#count{ I : box_inlier(B, I), value(I, T, 0), target(T) }, N > 0.
-
-boximpurity(B, N) :- box(B), boxpositives(B, P), boxnegatives(B,N), P >= N.
-boximpurity(B, P) :- box(B), boxpositives(B, P), boxnegatives(B,N), N >= P.
-
-boxmain(B, 0) :- box(B), boxnegatives(B, N), not boxpositives(B, _).
-boxmain(B, 1) :- box(B), not boxnegatives(B, _), boxpositives(B, P).
-boxmain(B, 0) :- box(B), boxnegatives(B, N), boxpositives(B, P), N > P.
-boxmain(B, 1) :- box(B), boxnegatives(B, N), boxpositives(B, P), N < P.
-boxmain(B, 2) :- box(B), boxnegatives(B, N), boxpositives(B, P), N = P.
+% Impurity requires at least knowing the majoritary class, thus counting.
+% Further research pending to see if we can do this in the minimize predicate.
+impurity(B, IM) :- box(B), CN=#count{ I : box_inlier(B,I), target(T), value(I, T, 0)}, CP=#count{ I : box_inlier(B,I), target(T), value(I, T, 1) }, IM=#min{ CP; CN }.
 
 % Feature is shared but limits don't overlap (L1 R1) [L2 R2] = 0
 overlap(B1, B2, F, 0) :- box(B1), box(B2), boxfeature(B1, F), boxfeature(B2, F), B1 < B2, boxlimits(B1, F, L1, R1),
@@ -49,15 +39,14 @@ overlap(B1, B2, F, OV) :- box(B1), box(B2), boxfeature(B1, F), not boxfeature(B2
 no_overlap(B1, B2) :- overlap(B1, B2, F, 0), feature(F).
 box_overlap(B1, B2) :- box(B1), box(B2), not no_overlap(B1, B2), B1 < B2.
 
-:- box(B), not boxmain(B, _).
+:- box(B), not box_inlier(B, _).
+:- box(B), not boxlimits(B, _, _, _).
 
 #show box/1.
 #show boxfeature/2.
 
 #show boxlimits/4.
 
-#show outlier/1.
-#show boxmain/2.
+#show impurity/2.
 
 #show box_overlap/2.
-#show overlap/4.
